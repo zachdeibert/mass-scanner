@@ -1,12 +1,12 @@
-package com.github.zachdeibert.massscanner
+package com.github.zachdeibert.massscanner.ui.scan
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.github.zachdeibert.massscanner.R
 
-class MainActivity : AppCompatActivity() {
-
+class ScanActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_scan)
     }
 }
