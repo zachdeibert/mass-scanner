@@ -12,4 +12,17 @@
         - Write external storage: the documents are saved in external storage
     </string>
     <string name="permissions_accept">Accept Permissions</string>
+    <string name="scan_help">
+        Place each page down in front of the camera and wait for the screen to flash or the sound to
+        play, then move on to the next page of your scan.  Once you are done with all pages, you can
+        exit to sort through your scanned pages.
+    </string>
+    <string name="scan_status">Scanned %d pages (%.1f %s)\nSpace remaining: %.1f %s</string>
+    <string-array name="filesize_units">
+        <item>B</item>
+        <item>KB</item>
+        <item>MB</item>
+        <item>GB</item>
+        <item>TB</item>
+    </string-array>
 </resources>

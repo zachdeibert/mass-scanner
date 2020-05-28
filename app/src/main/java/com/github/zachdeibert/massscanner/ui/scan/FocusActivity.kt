@@ -32,6 +32,13 @@ class FocusActivity : AppCompatActivity() {
         private const val FLING_VELOCITY_THRESHOLD = 10000
         const val RESULT_CAMERA_NUM = "camera_num"
         const val RESULT_FOCAL_DISTANCE = "focus"
+        const val RESULT_NOISE_REDUCTION_FILTER = "noise_filter"
+        val NOISE_REDUCTION_PRIORITY = arrayOf(
+            CameraMetadata.NOISE_REDUCTION_MODE_HIGH_QUALITY,
+            CameraMetadata.NOISE_REDUCTION_MODE_ZERO_SHUTTER_LAG,
+            CameraMetadata.NOISE_REDUCTION_MODE_FAST,
+            CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL,
+            CameraMetadata.NOISE_REDUCTION_MODE_OFF)
     }
 
     private val model: FocusViewModel by viewModels()
@@ -162,7 +169,7 @@ class FocusActivity : AppCompatActivity() {
                         surfaceHolder.setFixedSize(sizes[0].width, sizes[0].height)
                     }
                     val modes = characteristics.get(CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES)
-                    noiseReduction = ScanActivity.NOISE_REDUCTION_PRIORITY.firstOrNull { modes?.contains(it) == true } ?: CameraMetadata.NOISE_REDUCTION_MODE_OFF
+                    noiseReduction = NOISE_REDUCTION_PRIORITY.firstOrNull { modes?.contains(it) == true } ?: CameraMetadata.NOISE_REDUCTION_MODE_OFF
                     refocus()
                 }
 
@@ -196,6 +203,7 @@ class FocusActivity : AppCompatActivity() {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(RESULT_CAMERA_NUM, model.cameraNo)
             putExtra(RESULT_FOCAL_DISTANCE, model.focusDistance)
+            putExtra(RESULT_NOISE_REDUCTION_FILTER, noiseReduction)
         })
         finish()
     }
