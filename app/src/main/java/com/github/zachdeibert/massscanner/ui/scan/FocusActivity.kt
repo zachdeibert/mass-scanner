@@ -29,7 +29,6 @@ import kotlin.math.roundToInt
 class FocusActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "FocusActivity"
-        private const val PERMISSION_REQUEST_CODE = 1
         private const val FLING_VELOCITY_THRESHOLD = 10000
         const val RESULT_CAMERA_NUM = "camera_num"
         const val RESULT_FOCAL_DISTANCE = "focus"
@@ -231,17 +230,7 @@ class FocusActivity : AppCompatActivity() {
                 }
             }
         })
-        val missingPerms = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ).filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }.toTypedArray()
-        if (missingPerms.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this, missingPerms, PERMISSION_REQUEST_CODE)
-        } else {
-            startCamera()
-        }
+        startCamera()
         gestureDetector = GestureDetectorCompat(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
                 if (!multifingerGesture) {
@@ -307,15 +296,6 @@ class FocusActivity : AppCompatActivity() {
             event?.pointerCount == 1 && gestureDetector.onTouchEvent(event) -> true
             scaled -> true
             else -> super.onTouchEvent(event)
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (permissions.size != grantResults.size || grantResults.any { it != PackageManager.PERMISSION_GRANTED }) {
-            setResult(Activity.RESULT_CANCELED)
-            finish()
-        } else {
-            startCamera()
         }
     }
 

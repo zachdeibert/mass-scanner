@@ -4,4 +4,12 @@
     <string name="focus_status">Focused to: %.1f %s</string>
     <string name="focus_units_calibrated">cm</string>
     <string name="focus_units_uncalibrated" />
+    <string name="permissions_activity">
+        You must accept the permissions that are required by this app before using the app.\n
+        \n
+        Permissions required are:\n
+        - Camera: the camera is used for scanning documents\n
+        - Write external storage: the documents are saved in external storage
+    </string>
+    <string name="permissions_accept">Accept Permissions</string>
 </resources>
