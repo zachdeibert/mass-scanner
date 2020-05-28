@@ -2,6 +2,7 @@ package com.github.zachdeibert.massscanner.ui.scan
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.SurfaceTexture
@@ -30,6 +31,8 @@ class FocusActivity : AppCompatActivity() {
         private const val TAG = "FocusActivity"
         private const val PERMISSION_REQUEST_CODE = 1
         private const val FLING_VELOCITY_THRESHOLD = 10000
+        const val RESULT_CAMERA_NUM = "camera_num"
+        const val RESULT_FOCAL_DISTANCE = "focus"
     }
 
     private val model: FocusViewModel by viewModels()
@@ -188,6 +191,14 @@ class FocusActivity : AppCompatActivity() {
         camera?.close()
         camera = null
         startCamera()
+    }
+
+    fun confirmSettings(v: View) {
+        setResult(Activity.RESULT_OK, Intent().apply {
+            putExtra(RESULT_CAMERA_NUM, model.cameraNo)
+            putExtra(RESULT_FOCAL_DISTANCE, model.focusDistance)
+        })
+        finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
