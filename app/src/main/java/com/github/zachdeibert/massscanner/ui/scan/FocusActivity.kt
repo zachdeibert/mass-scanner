@@ -46,6 +46,7 @@ class FocusActivity : AppCompatActivity() {
                         val height = (sensorArray.height() / params.b).roundToInt()
                         set(CaptureRequest.SCALER_CROP_REGION, Rect((sensorArray.width() - width) / 2, (sensorArray.height() - height) / 2,
                             (sensorArray.width() + width) / 2, (sensorArray.height() + height) / 2))
+                        set(CaptureRequest.NOISE_REDUCTION_MODE, noiseReduction)
                         addTarget(surface)
                     }.build()
                     session.setRepeatingRequest(req, null, null)
@@ -105,6 +106,7 @@ class FocusActivity : AppCompatActivity() {
     private var hyperFocal: Float = 0f
     private var calibrated: Boolean = false
     private var maxZoom: Float = 1f
+    private var noiseReduction: Int = CameraMetadata.NOISE_REDUCTION_MODE_OFF
     private var multifingerGesture: Boolean = false
     private lateinit var focusStatus: TextView
     private lateinit var surfaceHolder: SurfaceHolder
@@ -157,6 +159,8 @@ class FocusActivity : AppCompatActivity() {
                     if (sizes != null) {
                         surfaceHolder.setFixedSize(sizes[0].width, sizes[0].height)
                     }
+                    val modes = characteristics.get(CameraCharacteristics.NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES)
+                    noiseReduction = ScanActivity.NOISE_REDUCTION_PRIORITY.firstOrNull { modes?.contains(it) == true } ?: CameraMetadata.NOISE_REDUCTION_MODE_OFF
                     refocus()
                 }
 
