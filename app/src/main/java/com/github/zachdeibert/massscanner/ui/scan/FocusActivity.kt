@@ -3,7 +3,7 @@ package com.github.zachdeibert.massscanner.ui.scan
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.gesture.Gesture
+import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,9 +19,7 @@ import com.github.zachdeibert.massscanner.R
 import com.github.zachdeibert.massscanner.util.Race2
 import com.github.zachdeibert.massscanner.util.Race4
 import com.github.zachdeibert.massscanner.util.RaceBase
-import kotlinx.android.synthetic.main.activity_focus.view.*
 import java.lang.Exception
-import java.lang.IllegalStateException
 import kotlin.math.abs
 
 class FocusActivity : AppCompatActivity() {
@@ -96,7 +94,8 @@ class FocusActivity : AppCompatActivity() {
     private var minFocus: Float = 0f
     private var hyperFocal: Float = 0f
     private var calibrated: Boolean = false
-    private var focusStatus: TextView? = null
+    private lateinit var focusStatus: TextView
+    private lateinit var surfaceHolder: SurfaceHolder
     private lateinit var gestureDetector: GestureDetectorCompat
 
     private fun enterFullscreen() {
@@ -107,7 +106,7 @@ class FocusActivity : AppCompatActivity() {
 
     private fun refocus() {
         request.c = model.focusDistance
-        focusStatus?.text = getString(R.string.focus_status, 100 / model.focusDistance,
+        focusStatus.text = getString(R.string.focus_status, 100 / model.focusDistance,
             getString(if (calibrated) R.string.focus_units_calibrated else R.string.focus_units_uncalibrated))
     }
 
@@ -138,6 +137,10 @@ class FocusActivity : AppCompatActivity() {
                     calibrated = cal == CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED ||
                             cal == CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE
                     model.focusDistance = hyperFocal
+                    val sizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)?.getOutputSizes(SurfaceTexture::class.java)
+                    if (sizes != null) {
+                        surfaceHolder.setFixedSize(sizes[0].width, sizes[0].height)
+                    }
                     refocus()
                 }
 
@@ -172,9 +175,11 @@ class FocusActivity : AppCompatActivity() {
         setContentView(R.layout.activity_focus)
         focusStatus = findViewById(R.id.focus_status)
         enterFullscreen()
-        findViewById<SurfaceView>(R.id.camera_surface).holder.addCallback(object : SurfaceHolder.Callback {
+        surfaceHolder = findViewById<SurfaceView>(R.id.camera_surface).holder
+        surfaceHolder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
                 if (holder != null) {
+                    surfaceHolder = holder
                     session.b = holder.surface
                     request.b = holder.surface
                 }
@@ -189,6 +194,7 @@ class FocusActivity : AppCompatActivity() {
 
             override fun surfaceCreated(holder: SurfaceHolder?) {
                 if (holder != null) {
+                    surfaceHolder = holder
                     session.b = holder.surface
                     request.b = holder.surface
                 }
@@ -209,7 +215,7 @@ class FocusActivity : AppCompatActivity() {
             override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
                 // Up (positive) - decrease diopters, increase focal distance
                 // Down (negative) - increase diopters, decrease focal distance
-                var metrics = DisplayMetrics()
+                val metrics = DisplayMetrics()
                 windowManager.defaultDisplay.getMetrics(metrics)
                 model.focusDistance -= distanceY * minFocus / metrics.heightPixels
                 if (model.focusDistance < 0) {
