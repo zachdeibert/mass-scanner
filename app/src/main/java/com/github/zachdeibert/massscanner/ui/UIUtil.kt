@@ -6,8 +6,8 @@ import com.github.zachdeibert.massscanner.util.Tuple
 
 object UIUtil {
     fun formatFileSize(bytes: Long): Tuple<Float, Int> {
-        var unit: Int
-        var unitDiv: Float
+        val unit: Int
+        val unitDiv: Float
         when {
             bytes >= 1000000000000 -> {
                 unit = 4
@@ -34,7 +34,7 @@ object UIUtil {
     }
 
     fun formatFileSize(bytes: Long, context: Context): Tuple<Float, String> {
-        var num = formatFileSize(bytes)
+        val num = formatFileSize(bytes)
         return Tuple(num.a, context.resources.getStringArray(R.array.filesize_units)[num.b])
     }
 }

@@ -96,7 +96,7 @@ class ScanActivity : AppCompatActivity() {
     private lateinit var scanStatus: TextView
     private lateinit var cameraSurfaceHolder: SurfaceHolder
 
-    fun updateStatus() {
+    private fun updateStatus() {
         val scannedSize = UIUtil.formatFileSize(model.scannedSize, this)
         val freeSize = UIUtil.formatFileSize(model.prescanSpaceLeft - model.scannedSize, this)
         scanStatus.text = getString(R.string.scan_status, model.scannedPages, scannedSize.a, scannedSize.b, freeSize.a, freeSize.b)
@@ -220,7 +220,7 @@ class ScanActivity : AppCompatActivity() {
         v.background = getDrawable(if (model.runScanner) R.drawable.ic_pause_circle_filled_white_48dp else R.drawable.ic_play_circle_filled_white_48dp)
     }
 
-    fun finishScanning(v: View) {
+    fun finishScanning(@Suppress("UNUSED_PARAMETER") v: View) {
         setResult(Activity.RESULT_OK)
         finish()
     }

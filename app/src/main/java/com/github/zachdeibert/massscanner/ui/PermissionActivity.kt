@@ -42,7 +42,7 @@ class PermissionActivity : AppCompatActivity() {
         }
     }
 
-    fun acceptPermissions(v: View?) {
+    fun acceptPermissions(@Suppress("UNUSED_PARAMETER") v: View?) {
         val missingPerms = REQUIRED_PERMISSIONS.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }.toTypedArray()

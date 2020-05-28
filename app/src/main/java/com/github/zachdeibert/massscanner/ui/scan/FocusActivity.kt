@@ -15,7 +15,6 @@ import android.view.*
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import com.github.zachdeibert.massscanner.R
 import com.github.zachdeibert.massscanner.util.Race2
@@ -192,14 +191,14 @@ class FocusActivity : AppCompatActivity() {
         camera = null
     }
 
-    fun nextCamera(v: View) {
+    fun nextCamera(@Suppress("UNUSED_PARAMETER") v: View) {
         ++model.cameraNo
         camera?.close()
         camera = null
         startCamera()
     }
 
-    fun confirmSettings(v: View) {
+    fun confirmSettings(@Suppress("UNUSED_PARAMETER") v: View) {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(RESULT_CAMERA_NUM, model.cameraNo)
             putExtra(RESULT_FOCAL_DISTANCE, model.focusDistance)
