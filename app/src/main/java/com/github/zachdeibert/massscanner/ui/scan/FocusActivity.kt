@@ -3,6 +3,7 @@ package com.github.zachdeibert.massscanner.ui.scan
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import androidx.appcompat.app.AppCompatActivity
@@ -19,8 +20,10 @@ import com.github.zachdeibert.massscanner.R
 import com.github.zachdeibert.massscanner.util.Race2
 import com.github.zachdeibert.massscanner.util.Race4
 import com.github.zachdeibert.massscanner.util.RaceBase
+import com.github.zachdeibert.massscanner.util.Tuple
 import java.lang.Exception
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class FocusActivity : AppCompatActivity() {
     companion object {
@@ -30,14 +33,19 @@ class FocusActivity : AppCompatActivity() {
     }
 
     private val model: FocusViewModel by viewModels()
-    private val request = Race4<CameraDevice, Surface, Float, CameraCaptureSession, CaptureRequest>().apply {
+    private val request = Race4<CameraDevice, Surface, Tuple<Float, Float>, CameraCaptureSession, CaptureRequest>().apply {
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-        producerCallback = object : Race4.ProducerCallback<CameraDevice, Surface, Float, CameraCaptureSession, CaptureRequest>() {
-            override fun produce(camera: CameraDevice, surface: Surface, focus: Float, session: CameraCaptureSession, finish: (CaptureRequest?) -> Unit) {
+        producerCallback = object : Race4.ProducerCallback<CameraDevice, Surface, Tuple<Float, Float>, CameraCaptureSession, CaptureRequest>() {
+            override fun produce(camera: CameraDevice, surface: Surface, params: Tuple<Float, Float>, session: CameraCaptureSession, finish: (CaptureRequest?) -> Unit) {
                 try {
                     val req = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
                         set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
-                        set(CaptureRequest.LENS_FOCUS_DISTANCE, focus)
+                        set(CaptureRequest.LENS_FOCUS_DISTANCE, params.a)
+                        val sensorArray = surfaceHolder.surfaceFrame
+                        val width = (sensorArray.width() / params.b).roundToInt()
+                        val height = (sensorArray.height() / params.b).roundToInt()
+                        set(CaptureRequest.SCALER_CROP_REGION, Rect((sensorArray.width() - width) / 2, (sensorArray.height() - height) / 2,
+                            (sensorArray.width() + width) / 2, (sensorArray.height() + height) / 2))
                         addTarget(surface)
                     }.build()
                     session.setRepeatingRequest(req, null, null)
@@ -52,6 +60,8 @@ class FocusActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+        c = Tuple(0f, 1f)
     }
     private val session = Race2<CameraDevice, Surface, CameraCaptureSession>().apply {
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -94,9 +104,12 @@ class FocusActivity : AppCompatActivity() {
     private var minFocus: Float = 0f
     private var hyperFocal: Float = 0f
     private var calibrated: Boolean = false
+    private var maxZoom: Float = 1f
+    private var multifingerGesture: Boolean = false
     private lateinit var focusStatus: TextView
     private lateinit var surfaceHolder: SurfaceHolder
     private lateinit var gestureDetector: GestureDetectorCompat
+    private lateinit var scaleDetector: ScaleGestureDetector
 
     private fun enterFullscreen() {
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
@@ -105,7 +118,9 @@ class FocusActivity : AppCompatActivity() {
     }
 
     private fun refocus() {
-        request.c = model.focusDistance
+        val params = request.c
+        params.a = model.focusDistance
+        request.c = params
         focusStatus.text = getString(R.string.focus_status, 100 / model.focusDistance,
             getString(if (calibrated) R.string.focus_units_calibrated else R.string.focus_units_uncalibrated))
     }
@@ -137,6 +152,7 @@ class FocusActivity : AppCompatActivity() {
                     calibrated = cal == CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_CALIBRATED ||
                             cal == CameraCharacteristics.LENS_INFO_FOCUS_DISTANCE_CALIBRATION_APPROXIMATE
                     model.focusDistance = hyperFocal
+                    maxZoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM) ?: 1f
                     val sizes = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)?.getOutputSizes(SurfaceTexture::class.java)
                     if (sizes != null) {
                         surfaceHolder.setFixedSize(sizes[0].width, sizes[0].height)
@@ -213,43 +229,69 @@ class FocusActivity : AppCompatActivity() {
         }
         gestureDetector = GestureDetectorCompat(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-                // Up (positive) - decrease diopters, increase focal distance
-                // Down (negative) - increase diopters, decrease focal distance
-                val metrics = DisplayMetrics()
-                windowManager.defaultDisplay.getMetrics(metrics)
-                model.focusDistance -= distanceY * minFocus / metrics.heightPixels
-                if (model.focusDistance < 0) {
-                    model.focusDistance = 0f
+                if (!multifingerGesture) {
+                    // Up (positive) - decrease diopters, increase focal distance
+                    // Down (negative) - increase diopters, decrease focal distance
+                    val metrics = DisplayMetrics()
+                    windowManager.defaultDisplay.getMetrics(metrics)
+                    model.focusDistance -= distanceY * minFocus / metrics.heightPixels
+                    if (model.focusDistance < 0) {
+                        model.focusDistance = 0f
+                    }
+                    if (model.focusDistance > minFocus) {
+                        model.focusDistance = minFocus
+                    }
+                    refocus()
+                    return true
                 }
-                if (model.focusDistance > minFocus) {
-                    model.focusDistance = minFocus
-                }
-                refocus()
-                return true
+                return false
             }
 
             override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
                 // Up (negative) - decrease diopters to zero, increase focal distance to infinity
                 // Down (positive) - increase diopters to max, decrease focal distance to minimum
-                if (abs(velocityY) > FLING_VELOCITY_THRESHOLD) {
+                if (abs(velocityY) > FLING_VELOCITY_THRESHOLD && !multifingerGesture) {
                     if (velocityY < 0) {
                         model.focusDistance = 0f
                     } else {
                         model.focusDistance = minFocus
                     }
                     refocus()
+                    return true
                 }
-                return true
+                return false
+            }
+
+            override fun onDown(e: MotionEvent?): Boolean {
+                multifingerGesture = false
+                return false
             }
         })
         gestureDetector.setIsLongpressEnabled(false)
+        scaleDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector?): Boolean {
+                multifingerGesture = true
+                model.zoom *= detector!!.scaleFactor
+                if (model.zoom > maxZoom) {
+                    model.zoom = maxZoom
+                }
+                if (model.zoom < 1) {
+                    model.zoom = 1f
+                }
+                val params = request.c
+                params.b = model.zoom
+                request.c = params
+                return true
+            }
+        })
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return if (gestureDetector.onTouchEvent(event)) {
-            true
-        } else {
-            super.onTouchEvent(event)
+        val scaled = scaleDetector.onTouchEvent(event)
+        return when {
+            event?.pointerCount == 1 && gestureDetector.onTouchEvent(event) -> true
+            scaled -> true
+            else -> super.onTouchEvent(event)
         }
     }
 
