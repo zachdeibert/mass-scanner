@@ -114,6 +114,9 @@ class FocusActivity : AppCompatActivity() {
     private fun startCamera() {
         val manager = getSystemService(CameraManager::class.java)
         manager?.apply {
+            if (model.cameraNo >= cameraIdList.size) {
+                model.cameraNo = 0
+            }
             val cameraId = cameraIdList[model.cameraNo]
             if (ActivityCompat.checkSelfPermission(
                     this@FocusActivity,
@@ -155,6 +158,13 @@ class FocusActivity : AppCompatActivity() {
         session.close()
         camera?.close()
         camera = null
+    }
+
+    fun nextCamera(v: View) {
+        ++model.cameraNo
+        camera?.close()
+        camera = null
+        startCamera()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

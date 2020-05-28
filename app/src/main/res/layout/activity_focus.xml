@@ -27,4 +27,13 @@
         android:text="@string/focus_help"
         android:textAlignment="center"
         android:textAppearance="@style/image_text" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="right|top"
+        android:layout_margin="10dp"
+        android:background="@android:drawable/ic_menu_camera"
+        android:onClick="nextCamera" />
 </FrameLayout>
