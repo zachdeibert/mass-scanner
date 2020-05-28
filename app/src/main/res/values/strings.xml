@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Mass Scanner</string>
-
-    <string name="title_activity_focus">FocusActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="focus_help">Swipe up and down until the image is clearly in focus</string>
+    <string name="focus_status">Focused to: %.1f %s</string>
+    <string name="focus_units_calibrated">cm</string>
+    <string name="focus_units_uncalibrated" />
 </resources>

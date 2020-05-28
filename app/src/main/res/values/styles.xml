@@ -1,7 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="app_theme" parent="Theme.AppCompat.Light.NoActionBar">
+    </style>
+    <style name="image_text" parent="TextAppearance.AppCompat">
+        <item name="android:textColor">@color/image_text_color</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/image_text_shadow</item>
+        <item name="android:shadowRadius">5</item>
     </style>
 </resources>

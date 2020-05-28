@@ -9,4 +9,22 @@
         android:id="@+id/camera_surface"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/focus_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/focus_status"
+        android:textAppearance="@style/image_text" />
+
+    <TextView
+        android:id="@+id/help_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="10dp"
+        android:text="@string/focus_help"
+        android:textAlignment="center"
+        android:textAppearance="@style/image_text" />
 </FrameLayout>
