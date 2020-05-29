@@ -8,4 +8,5 @@ class ScanViewModel : ViewModel() {
     var focalDistance: Float = 0f
     var noiseFilter: Int = CameraMetadata.NOISE_REDUCTION_MODE_OFF
     var runScanner: Boolean = true
+    var useFlash: Boolean = false
 }

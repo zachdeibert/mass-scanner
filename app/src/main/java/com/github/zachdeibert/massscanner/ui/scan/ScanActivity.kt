@@ -52,6 +52,7 @@ class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, 
 
     private fun loadCameraSettings() {
         preview.cameraNumber = model.cameraNum
+        preview.setRequestProperty(CaptureRequest.FLASH_MODE, if (model.useFlash) CaptureRequest.FLASH_MODE_TORCH else CaptureRequest.FLASH_MODE_OFF)
         preview.setRequestProperty(CaptureRequest.NOISE_REDUCTION_MODE, model.noiseFilter)
         preview.setRequestProperty(CaptureRequest.LENS_FOCUS_DISTANCE, model.focalDistance)
     }
@@ -60,6 +61,7 @@ class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, 
         super.onResume()
         loadCameraSettings()
         ui.runScanner = model.runScanner
+        ui.useFlash = model.useFlash
         if (model.runScanner) {
             thread.onResume()
         }
@@ -117,6 +119,11 @@ class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, 
         } else {
             thread.onPause()
         }
+    }
+
+    override fun onFlashUpdate(sender: ScanUIFragment, useFlash: Boolean) {
+        model.useFlash = useFlash
+        loadCameraSettings()
     }
 
     override fun onFinishScanning(sender: ScanUIFragment) {

@@ -17,12 +17,14 @@ import com.github.zachdeibert.massscanner.ui.UIUtil
 class ScanUIFragment : Fragment(), ScanThread.AnalysisListener {
     interface CommandListener {
         fun onScannerStateUpdate(sender: ScanUIFragment, run: Boolean)
+        fun onFlashUpdate(sender: ScanUIFragment, useFlash: Boolean)
         fun onFinishScanning(sender: ScanUIFragment)
     }
 
     private val model: ScanUIViewModel by activityViewModels()
     private lateinit var scanStatus: TextView
     private lateinit var pauseBtn: Button
+    private lateinit var flashBtn: Button
 
     private var _runScanner = false
     var runScanner: Boolean
@@ -37,10 +39,27 @@ class ScanUIFragment : Fragment(), ScanThread.AnalysisListener {
             }
         }
 
+    private var _useFlash = false
+    var useFlash: Boolean
+        get() = _useFlash
+        set(value) {
+            if (value != useFlash) {
+                _useFlash = value
+                flashBtn.background = requireActivity().getDrawable(
+                    if (value) R.drawable.ic_flash_on_white_48dp
+                    else R.drawable.ic_flash_off_white_48dp
+                )
+            }
+        }
+
     var commandListener: CommandListener? = null
 
     protected fun fireScannerStateUpdate() {
         commandListener?.onScannerStateUpdate(this, runScanner)
+    }
+
+    protected fun fireFlashUpdate() {
+        commandListener?.onFlashUpdate(this, useFlash)
     }
 
     protected fun fireFinishScanning() {
@@ -65,6 +84,12 @@ class ScanUIFragment : Fragment(), ScanThread.AnalysisListener {
                 setOnClickListener {
                     runScanner = !runScanner
                     fireScannerStateUpdate()
+                }
+            }
+            flashBtn = findViewById<Button>(R.id.flash_button).apply {
+                setOnClickListener {
+                    useFlash = !useFlash
+                    fireFlashUpdate()
                 }
             }
             findViewById<Button>(R.id.finish_button).setOnClickListener {

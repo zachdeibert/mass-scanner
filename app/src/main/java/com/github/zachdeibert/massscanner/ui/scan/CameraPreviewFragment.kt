@@ -78,6 +78,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
             _template = value
             onRequestParameterChanged()
         }
+
     val cameraCount: Int
         get() = cameraManager.cameraIdList.size
 
