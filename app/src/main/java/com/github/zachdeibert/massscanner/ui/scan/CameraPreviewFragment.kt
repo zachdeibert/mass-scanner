@@ -173,6 +173,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
                 camera?.close()
                 camera = null
                 cameraManager.openCamera(id, (this as CameraDeviceStateCallback).convert(), null)
+                Log.d(TAG, "Camera allocated.")
                 fireCameraCharacteristicUpdated()
             }
         }
@@ -217,6 +218,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     override fun onDisconnected(camera: CameraDevice) {
         this.camera = null
         camera.close()
+        Log.i(TAG, "Camera freed due to disconnect.")
     }
 
     override fun onError(camera: CameraDevice, error: Int) {
@@ -260,5 +262,6 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
         session = null
         camera?.close()
         camera = null
+        Log.d(TAG, "Camera freed.")
     }
 }
