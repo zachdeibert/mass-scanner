@@ -3,14 +3,14 @@ package com.github.zachdeibert.massscanner.ui.scan
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.media.Image
-import android.media.ImageReader
 import android.util.Log
 import android.util.Size
+import com.github.zachdeibert.massscanner.util.AsyncImageReader
 import java.nio.ByteBuffer
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
-class ScanThread : Thread(), ImageReader.OnImageAvailableListener {
+class ScanThread : Thread("Scanning Worker"), AsyncImageReader.OnImageAvailableListener {
     companion object {
         private const val TAG = "ScanThread"
         private const val STATE_RESUMED = 1
@@ -124,22 +124,11 @@ class ScanThread : Thread(), ImageReader.OnImageAvailableListener {
         }
     }
 
-    private var imageReader: ImageReader? = null
-    private var imagesReady: Int = 0
-    override fun onImageAvailable(reader: ImageReader?) {
-        if (reader != null) {
-            if (imageReader != reader) {
-                imageReader = reader
-                imagesReady = 0
-            }
-            lock.withLock {
-                if (++imagesReady > 1) {
-                    reader.acquireNextImage().close()
-                    --imagesReady
-                } else {
-                    cond.signalAll()
-                }
-            }
+    private var imageReader: AsyncImageReader? = null
+    override fun onImageAvailable(reader: AsyncImageReader) {
+        imageReader = reader
+        lock.withLock {
+            cond.signalAll()
         }
     }
 
@@ -155,8 +144,6 @@ class ScanThread : Thread(), ImageReader.OnImageAvailableListener {
                                 if (readImage == null) {
                                     cond.await()
                                     return@also
-                                } else {
-                                    --imagesReady
                                 }
                             }
                             STATE_PAUSED -> {

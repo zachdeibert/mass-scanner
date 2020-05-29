@@ -4,9 +4,9 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.hardware.camera2.*
-import android.media.ImageReader
 import android.os.Bundle
 import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
 import android.view.*
@@ -14,9 +14,11 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 
 import com.github.zachdeibert.massscanner.R
+import com.github.zachdeibert.massscanner.util.AsyncImageReader
 import com.github.zachdeibert.massscanner.util.iface.CameraCaptureSessionStateCallback
 import com.github.zachdeibert.massscanner.util.iface.CameraDeviceStateCallback
 import com.github.zachdeibert.massscanner.util.iface.convert
+import java.util.concurrent.Semaphore
 
 class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceStateCallback, CameraCaptureSessionStateCallback {
     companion object {
@@ -26,7 +28,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     interface CameraListener {
         fun onCameraCharacteristicsUpdated(sender: CameraPreviewFragment)
     }
-    interface CameraListener2 : CameraListener, ImageReader.OnImageAvailableListener
+    interface CameraListener2 : CameraListener, AsyncImageReader.OnImageAvailableListener
 
     private val cameraManager by lazy { requireActivity().getSystemService(CameraManager::class.java) }
 
@@ -34,6 +36,18 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     private var camera: CameraDevice? = null
     private var surface: Surface? = null
     private var session: CameraCaptureSession? = null
+
+    private var thread = HandlerThread("Camera Preview Worker").apply { start() }
+    private var _handler = Handler(thread.looper)
+    private val handler: Handler
+        get() {
+            if (thread.state == Thread.State.TERMINATED) {
+                thread = HandlerThread("Camera Preview Worker").apply { start() }
+                _handler = Handler(thread.looper)
+            }
+            return _handler
+        }
+    private val uiHandler = Handler()
 
     private var _cameraNumber: Int = 0
     var cameraNumber: Int
@@ -68,7 +82,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
         get() = cameraManager.cameraIdList.size
 
     private var _cameraListener: CameraListener? = null
-    private var imageReader: ImageReader? = null
+    private var imageReader: AsyncImageReader? = null
     var cameraListener: CameraListener?
         get() = _cameraListener
         set(value) {
@@ -83,11 +97,11 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
                 imageReader = null
             } else if (value is CameraListener2) {
                 if (imageReader == null) {
-                    imageReader = ImageReader.newInstance(imageSize.width, imageSize.height, ImageFormat.YUV_420_888, 3)
-                    imageReader?.setOnImageAvailableListener(value, null)
+                    imageReader = AsyncImageReader.newInstance(imageSize.width, imageSize.height, ImageFormat.YUV_420_888, 3)
+                    imageReader?.setOnImageAvailableListener(value, uiHandler)
                     onSessionParameterChanged()
                 } else {
-                    imageReader?.setOnImageAvailableListener(value, null)
+                    imageReader?.setOnImageAvailableListener(value, uiHandler)
                 }
             }
             if (characteristics != null) {
@@ -113,11 +127,23 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     private var characteristics: CameraCharacteristics? = null
     fun <T> getCharacteristic(key: CameraCharacteristics.Key<T>): T? = characteristics?.get(key)
 
+    private fun waitForUiUpdate() {
+        val mutex = Semaphore(1)
+        mutex.acquire()
+        requireActivity().runOnUiThread {
+            mutex.release()
+        }
+        handler.post {
+            mutex.acquire()
+        }
+    }
+
     private var requestParameterChanged = false
     fun onRequestParameterChanged() {
         if (!requestParameterChanged) {
             requestParameterChanged = true
-            Handler().post {
+            waitForUiUpdate()
+            handler.post {
                 requestParameterChanged = false
                 val camera = this.camera
                 val surface = this.surface
@@ -128,7 +154,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
                         requestProperties.values.forEach { it(this) }
                         addTarget(surface)
                         if (imageReader != null) {
-                            addTarget(imageReader.surface)
+                            imageReader.surface?.also { addTarget(it) }
                         }
                     }.build()
                     session.setRepeatingRequest(req, null, null)
@@ -141,7 +167,8 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     fun onSessionParameterChanged() {
         if (!sessionParameterChanged) {
             sessionParameterChanged = true
-            Handler().post {
+            waitForUiUpdate()
+            handler.post {
                 sessionParameterChanged = false
                 val camera = this.camera
                 val surface = this.surface
@@ -150,7 +177,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
                 session = null
                 if (camera != null && surface != null) {
                     camera.createCaptureSession(if (imageReader == null) listOf(surface) else listOf(surface, imageReader.surface),
-                        (this as CameraCaptureSessionStateCallback).convert(), null)
+                        (this as CameraCaptureSessionStateCallback).convert(), uiHandler)
                 }
             }
         }
@@ -160,7 +187,8 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     fun onCameraNumberChanged() {
         if (!cameraNumberChanged) {
             cameraNumberChanged = true
-            Handler().post {
+            waitForUiUpdate()
+            handler.post {
                 cameraNumberChanged = false
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                     Log.e(TAG, "Missing permissions to operate camera.")
@@ -172,7 +200,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
                 session = null
                 camera?.close()
                 camera = null
-                cameraManager.openCamera(id, (this as CameraDeviceStateCallback).convert(), null)
+                cameraManager.openCamera(id, (this as CameraDeviceStateCallback).convert(), handler)
                 Log.d(TAG, "Camera allocated.")
                 fireCameraCharacteristicUpdated()
             }
@@ -183,13 +211,13 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
     fun onImageSizeChanged() {
         if (!imageSizeChanged) {
             imageSizeChanged = true
-            Handler().post {
+            uiHandler.post {
                 imageSizeChanged = false
                 holder.setFixedSize(imageSize.width, imageSize.height)
                 if (imageReader != null) {
                     imageReader?.close()
-                    imageReader = ImageReader.newInstance(imageSize.width, imageSize.height, ImageFormat.YUV_420_888, 3)
-                    imageReader?.setOnImageAvailableListener(cameraListener as ImageReader.OnImageAvailableListener, null)
+                    imageReader = AsyncImageReader.newInstance(imageSize.width, imageSize.height, ImageFormat.YUV_420_888, 3)
+                    imageReader?.setOnImageAvailableListener(cameraListener as AsyncImageReader.OnImageAvailableListener, uiHandler)
                     onSessionParameterChanged()
                 }
             }
@@ -217,14 +245,18 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
 
     override fun onDisconnected(camera: CameraDevice) {
         this.camera = null
-        camera.close()
+        handler.post {
+            camera.close()
+        }
         Log.i(TAG, "Camera freed due to disconnect.")
     }
 
     override fun onError(camera: CameraDevice, error: Int) {
-        Log.e(TAG, "Camera error: $error")
         this.camera = null
-        camera.close()
+        handler.post {
+            camera.close()
+        }
+        Log.e(TAG, "Camera error: $error")
     }
 
     override fun onConfigureFailed(session: CameraCaptureSession) {
@@ -245,6 +277,7 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
         super.onStart()
         holder = requireView().findViewById<SurfaceView>(R.id.camera_surface).holder
         holder.addCallback(this)
+        holder.setKeepScreenOn(true)
     }
 
     override fun onResume() {
@@ -258,10 +291,20 @@ class CameraPreviewFragment : Fragment(), SurfaceHolder.Callback, CameraDeviceSt
 
     override fun onPause() {
         super.onPause()
-        session?.close()
-        session = null
-        camera?.close()
-        camera = null
+        handler.post {
+            session?.close()
+            session = null
+            camera?.close()
+            camera = null
+        }
         Log.d(TAG, "Camera freed.")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.post {
+            thread.quitSafely()
+        }
+        thread.join()
     }
 }

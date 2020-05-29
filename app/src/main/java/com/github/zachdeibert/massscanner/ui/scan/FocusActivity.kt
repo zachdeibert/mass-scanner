@@ -43,8 +43,12 @@ class FocusActivity : FragmentActivity(), CameraPreviewFragment.CameraListener {
 
     private fun onFocusChange() {
         camera.setRequestProperty(CaptureRequest.LENS_FOCUS_DISTANCE, model.focusDistance)
-        focusStatus.text = getString(R.string.focus_status, 100 / model.focusDistance,
-            getString(if (calibrated) R.string.focus_units_calibrated else R.string.focus_units_uncalibrated))
+        runOnUiThread {
+            focusStatus.text = getString(
+                R.string.focus_status, 100 / model.focusDistance,
+                getString(if (calibrated) R.string.focus_units_calibrated else R.string.focus_units_uncalibrated)
+            )
+        }
     }
 
     private fun onZoom() {

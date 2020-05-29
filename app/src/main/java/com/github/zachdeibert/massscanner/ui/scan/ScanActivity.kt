@@ -6,13 +6,13 @@ import android.graphics.SurfaceTexture
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
-import android.media.ImageReader
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import com.github.zachdeibert.massscanner.R
 import com.github.zachdeibert.massscanner.ui.PermissionActivity
+import com.github.zachdeibert.massscanner.util.AsyncImageReader
 
 class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, ScanUIFragment.CommandListener {
     companion object {
@@ -97,14 +97,16 @@ class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, 
     override fun onCameraCharacteristicsUpdated(sender: CameraPreviewFragment) {
         val sizes = preview.getCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)?.getOutputSizes(SurfaceTexture::class.java)
         if (sizes != null) {
-            preview.imageSize = sizes[0]
-            augment.imageSize = sizes[0]
-            thread.maxImageSize = sizes[0]
+            runOnUiThread {
+                preview.imageSize = sizes[0]
+                augment.imageSize = sizes[0]
+                thread.maxImageSize = sizes[0]
+            }
             Log.i(TAG, "Capture size: ${sizes[0].width}x${sizes[0].height}")
         }
     }
 
-    override fun onImageAvailable(reader: ImageReader?) {
+    override fun onImageAvailable(reader: AsyncImageReader) {
         thread.onImageAvailable(reader)
     }
 
