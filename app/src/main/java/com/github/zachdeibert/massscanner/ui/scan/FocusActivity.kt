@@ -151,8 +151,10 @@ class FocusActivity : AppCompatActivity() {
                 return
             }
             val characteristics = getCameraCharacteristics(cameraId)
+            Log.d(TAG, "Opening camera...")
             openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
+                    Log.d(TAG, "Camera opened.")
                     session.a = camera
                     request.a = camera
                     this@FocusActivity.camera = camera
@@ -173,6 +175,7 @@ class FocusActivity : AppCompatActivity() {
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
+                    Log.d(TAG, "Camera disconnected.")
                     camera.close()
                 }
 
@@ -199,6 +202,7 @@ class FocusActivity : AppCompatActivity() {
     }
 
     fun confirmSettings(@Suppress("UNUSED_PARAMETER") v: View) {
+        freeCamera()
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra(RESULT_CAMERA_NUM, model.cameraNo)
             putExtra(RESULT_FOCAL_DISTANCE, model.focusDistance)
@@ -314,6 +318,11 @@ class FocusActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        freeCamera()
+    }
+
+    override fun onStop() {
+        super.onStop()
         freeCamera()
     }
 }
