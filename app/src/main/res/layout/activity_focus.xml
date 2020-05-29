@@ -7,8 +7,9 @@
     android:layout_height="match_parent"
     tools:context=".ui.scan.FocusActivity">
 
-    <SurfaceView
-        android:id="@+id/camera_surface"
+    <androidx.fragment.app.FragmentContainerView
+        android:name="com.github.zachdeibert.massscanner.ui.scan.CameraPreviewFragment"
+        android:id="@+id/camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toTopOf="parent"
