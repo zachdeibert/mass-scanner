@@ -4,9 +4,9 @@ project(mass-scanner-natives)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(mass-scanner-natives SHARED
-    src/c/jni.c
-    src/c/image.c
-    src/c/luminanceProbe.c
-    src/c/main.c
+    src/main/c/jni.c
+    src/main/c/image.c
+    src/main/c/luminanceProbe.c
+    src/main/c/main.c
 )
-target_include_directories(mass-scanner-natives PUBLIC src/c)
+target_include_directories(mass-scanner-natives PUBLIC src/main/c)
