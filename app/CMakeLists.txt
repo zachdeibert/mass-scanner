@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
+project(mass-scanner-natives)
+
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(mass-scanner-natives SHARED
     src/c/jni.c

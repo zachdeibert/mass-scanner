@@ -23,9 +23,11 @@ android {
         }
     }
 
-    externalNativeBuild {
-        cmake {
-            path file("CMakeLists.txt")
+    if (!"yes".equalsIgnoreCase(System.getenv("NO_NDK"))) {
+        externalNativeBuild {
+            cmake {
+                path file("CMakeLists.txt")
+            }
         }
     }
 
@@ -46,3 +48,36 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:1.1.1"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
 }
+
+def nativeTestDir = new File(projectDir, "build/nativeTest")
+
+task nativeTestEnvironment(type: Exec) {
+    workingDir nativeTestDir
+    commandLine "cmake", "../../src/test/c"
+    standardOutput System.out
+    doFirst {
+        nativeTestDir.mkdirs()
+    }
+    outputs.upToDateWhen {
+        new File(nativeTestDir, "Makefile").exists() || new File(nativeTestDir, "mass-scanner-natives-test.sln").exists()
+    }
+}
+
+task nativeBuild(type: Exec) {
+    workingDir nativeTestDir
+    commandLine "cmake", "--build", "."
+    standardOutput System.out
+    dependsOn nativeTestEnvironment
+}
+
+task nativeTest(type: Exec) {
+    workingDir nativeTestDir
+    commandLine "cmake", "--build", ".", "--target", "check"
+    standardOutput System.out
+    dependsOn nativeTestEnvironment
+}
+
+task cleanNativeTest(type: Delete) {
+    delete nativeTestDir
+}
+clean.dependsOn cleanNativeTest

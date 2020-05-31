@@ -1,3 +1,5 @@
+#ifdef __ANDROID__
+
 #include <stdlib.h>
 #include <jni.h>
 #include "errors.h"
@@ -171,3 +173,5 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     }
     return REQ_VERSION;
 }
+
+#endif

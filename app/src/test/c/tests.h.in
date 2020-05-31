@@ -1,0 +1,11 @@
+#ifndef MASS_SCANNER_TESTS_H
+#define MASS_SCANNER_TESTS_H
+
+@gen_test_proto_code@
+const static void (*tests[])() = {
+@gen_test_array_code@    NULL
+};
+
+const static int tests_count = @n_tests@;
+
+#endif

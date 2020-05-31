@@ -1,0 +1,13 @@
+{
+    "files.exclude": {
+        "**/.cxx": true,
+        "**/.gradle": true,
+        "**/.idea": true,
+        "**/build/": true
+    },
+    "cmake.autoSelectActiveFolder": false,
+    "cmake.buildDirectory": "${workspaceFolder}/app/build/nativeTest",
+    "cmake.sourceDirectory": "${workspaceFolder}/app/src/test/c",
+    "cmake.configureOnOpen": true,
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+}
