@@ -47,7 +47,7 @@ class ScanNative : AutoCloseable {
     companion object {
         private const val TAG = "ScanNative"
 
-        private const val PARAMETERS_SIZE = (19 * 4)
+        private const val PARAMETERS_SIZE = (20 * 4)
         private const val OUTPUT_FLAG_IMAGE_READY = 0x00000001
         private const val OUTPUT_FLAG_AUGMENT_READY = 0x00000002
         private const val OUTPUT_FLAG_SETUP_COMPLETE = 0x00000004
@@ -60,18 +60,19 @@ class ScanNative : AutoCloseable {
         private const val PARAMETER_U_ROW_STRIDE = 5
         private const val PARAMETER_V_PIXEL_STRIDE = 6
         private const val PARAMETER_V_ROW_STRIDE = 7
+        private const val PARAMETER_IMAGE_ROTATION = 8
 
-        private const val PARAMETER_OUTPUT_FLAGS = 8
-        private const val PARAMETER_OUTPUT_IMAGE_WIDTH = 9
-        private const val PARAMETER_OUTPUT_IMAGE_HEIGHT = 10
-        private const val PARAMETER_AUGMENT_POINT_1X = 11
-        private const val PARAMETER_AUGMENT_POINT_1Y = 12
-        private const val PARAMETER_AUGMENT_POINT_2X = 13
-        private const val PARAMETER_AUGMENT_POINT_2Y = 14
-        private const val PARAMETER_AUGMENT_POINT_3X = 15
-        private const val PARAMETER_AUGMENT_POINT_3Y = 16
-        private const val PARAMETER_AUGMENT_POINT_4X = 17
-        private const val PARAMETER_AUGMENT_POINT_4Y = 18
+        private const val PARAMETER_OUTPUT_FLAGS = 9
+        private const val PARAMETER_OUTPUT_IMAGE_WIDTH = 10
+        private const val PARAMETER_OUTPUT_IMAGE_HEIGHT = 11
+        private const val PARAMETER_AUGMENT_POINT_1X = 12
+        private const val PARAMETER_AUGMENT_POINT_1Y = 13
+        private const val PARAMETER_AUGMENT_POINT_2X = 14
+        private const val PARAMETER_AUGMENT_POINT_2Y = 15
+        private const val PARAMETER_AUGMENT_POINT_3X = 16
+        private const val PARAMETER_AUGMENT_POINT_3Y = 17
+        private const val PARAMETER_AUGMENT_POINT_4X = 18
+        private const val PARAMETER_AUGMENT_POINT_4Y = 19
 
         init {
             System.loadLibrary("mass-scanner-natives")
@@ -87,7 +88,8 @@ class ScanNative : AutoCloseable {
     private var ptr: Long
     private var params: IntBuffer
 
-    fun processFrame(image: Image, bitmap: ByteBuffer): ScanResult {
+    fun processFrame(image: Image, rotation: Int, bitmap: ByteBuffer): ScanResult {
+        Log.d("ScanNative", "width = ${image.width}, height = ${image.height}, rotation = $rotation")
         synchronized(params) {
             val planes = image.planes
             params.put(PARAMETER_IMAGE_WIDTH, image.width)
@@ -98,6 +100,7 @@ class ScanNative : AutoCloseable {
             params.put(PARAMETER_U_ROW_STRIDE, planes[1].rowStride)
             params.put(PARAMETER_V_PIXEL_STRIDE, planes[2].pixelStride)
             params.put(PARAMETER_V_ROW_STRIDE, planes[2].rowStride)
+            params.put(PARAMETER_IMAGE_ROTATION, rotation)
             val err = Error.lookup(process_frame(ptr, planes[0].buffer, planes[1].buffer, planes[2].buffer, bitmap))
             if (err != Error.ERR_SUCCESS) {
                 throw err.ex!!

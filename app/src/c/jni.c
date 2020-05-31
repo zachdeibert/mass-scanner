@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <jni.h>
 #include "errors.h"
+#include "image.h"
+#include "main.h"
 #include "state.h"
 
 #define REQ_VERSION (JNI_VERSION_1_4)
-#define PARAMETERS_SIZE (19 * sizeof(int32_t))
+#define PARAMETERS_SIZE (20 * sizeof(int32_t))
 #define OUTPUT_FLAG_IMAGE_READY (0x00000001)
 #define OUTPUT_FLAG_AUGMENT_READY (0x00000002)
 #define OUTPUT_FLAG_SETUP_COMPLETE (0x00000004)
@@ -18,18 +20,19 @@
 #define PARAMETER_U_ROW_STRIDE (5)
 #define PARAMETER_V_PIXEL_STRIDE (6)
 #define PARAMETER_V_ROW_STRIDE (7)
+#define PARAMETER_IMAGE_ROTATION (8)
 
-#define PARAMETER_OUTPUT_FLAGS (8)
-#define PARAMETER_OUTPUT_IMAGE_WIDTH (9)
-#define PARAMETER_OUTPUT_IMAGE_HEIGHT (10)
-#define PARAMETER_AUGMENT_POINT_1X (11)
-#define PARAMETER_AUGMENT_POINT_1Y (12)
-#define PARAMETER_AUGMENT_POINT_2X (13)
-#define PARAMETER_AUGMENT_POINT_2Y (14)
-#define PARAMETER_AUGMENT_POINT_3X (15)
-#define PARAMETER_AUGMENT_POINT_3Y (16)
-#define PARAMETER_AUGMENT_POINT_4X (17)
-#define PARAMETER_AUGMENT_POINT_4Y (18)
+#define PARAMETER_OUTPUT_FLAGS (9)
+#define PARAMETER_OUTPUT_IMAGE_WIDTH (10)
+#define PARAMETER_OUTPUT_IMAGE_HEIGHT (11)
+#define PARAMETER_AUGMENT_POINT_1X (12)
+#define PARAMETER_AUGMENT_POINT_1Y (13)
+#define PARAMETER_AUGMENT_POINT_2X (14)
+#define PARAMETER_AUGMENT_POINT_2Y (15)
+#define PARAMETER_AUGMENT_POINT_3X (16)
+#define PARAMETER_AUGMENT_POINT_3Y (17)
+#define PARAMETER_AUGMENT_POINT_4X (18)
+#define PARAMETER_AUGMENT_POINT_4Y (19)
 
 #define SUPPRESS_UNUSED_PARAMETER(x) do { (void) x; } while (0)
 
@@ -80,31 +83,32 @@ JNIEXPORT jint JNICALL jni_process_frame(JNIEnv *env, jobject this, jlong ptr, j
         return ERR_ARGUMENT_NULL;
     }
     image_t image = {
-            .width = (size_t) state->parameters[PARAMETER_IMAGE_WIDTH],
-            .height = (size_t) state->parameters[PARAMETER_IMAGE_HEIGHT],
+            .width = (unsigned) state->parameters[PARAMETER_IMAGE_WIDTH],
+            .height = (unsigned) state->parameters[PARAMETER_IMAGE_HEIGHT],
+            .rotation = (unsigned) state->parameters[PARAMETER_IMAGE_ROTATION],
             .y = {
                     .buf = (*env)->GetDirectBufferAddress(env, y),
-                    .buf_len = (size_t) (*env)->GetDirectBufferCapacity(env, y),
-                    .pixel_stride = (size_t) state->parameters[PARAMETER_Y_PIXEL_STRIDE],
-                    .row_stride = (size_t) state->parameters[PARAMETER_Y_ROW_STRIDE],
+                    .buf_len = (unsigned) (*env)->GetDirectBufferCapacity(env, y),
+                    .pixel_stride = (unsigned) state->parameters[PARAMETER_Y_PIXEL_STRIDE],
+                    .row_stride = (unsigned) state->parameters[PARAMETER_Y_ROW_STRIDE],
             },
             .u = {
                     .buf = (*env)->GetDirectBufferAddress(env, u),
-                    .buf_len = (size_t) (*env)->GetDirectBufferCapacity(env, u),
-                    .pixel_stride = (size_t) state->parameters[PARAMETER_U_PIXEL_STRIDE],
-                    .row_stride = (size_t) state->parameters[PARAMETER_U_ROW_STRIDE],
+                    .buf_len = (unsigned) (*env)->GetDirectBufferCapacity(env, u),
+                    .pixel_stride = (unsigned) state->parameters[PARAMETER_U_PIXEL_STRIDE],
+                    .row_stride = (unsigned) state->parameters[PARAMETER_U_ROW_STRIDE],
             },
             .v = {
                     .buf = (*env)->GetDirectBufferAddress(env, v),
-                    .buf_len = (size_t) (*env)->GetDirectBufferCapacity(env, v),
-                    .pixel_stride = (size_t) state->parameters[PARAMETER_V_PIXEL_STRIDE],
-                    .row_stride = (size_t) state->parameters[PARAMETER_V_ROW_STRIDE],
+                    .buf_len = (unsigned) (*env)->GetDirectBufferCapacity(env, v),
+                    .pixel_stride = (unsigned) state->parameters[PARAMETER_V_PIXEL_STRIDE],
+                    .row_stride = (unsigned) state->parameters[PARAMETER_V_ROW_STRIDE],
             }
     };
     bitmap_t bitmap = {
             .captured = 0,
             .buf = (*env)->GetDirectBufferAddress(env, bmp),
-            .buf_len = (size_t) (*env)->GetDirectBufferCapacity(env, bmp),
+            .buf_len = (unsigned) (*env)->GetDirectBufferCapacity(env, bmp),
             .width = 0,
             .height = 0
     };

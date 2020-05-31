@@ -59,6 +59,8 @@ class ScanThread : Thread("Scanning Worker"), AsyncImageReader.OnImageAvailableL
             }
         }
 
+    var rotation: Int = 0
+
     var analysisListener: AnalysisListener? = null
 
     protected fun fireAugmentData(points: Array<Point>) {
@@ -163,7 +165,7 @@ class ScanThread : Thread("Scanning Worker"), AsyncImageReader.OnImageAvailableL
                         Log.wtf(TAG, "Synchronization logic error")
                     } else {
                         val bitmap = bitmapBuffer
-                        val res = native.processFrame(image, bitmap)
+                        val res = native.processFrame(image, rotation, bitmap)
                         image.close()
                         fireAugment(res.augment)
                         if (res.hasOutputImage) {

@@ -8,6 +8,7 @@ import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CaptureRequest
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import com.github.zachdeibert.massscanner.R
@@ -97,11 +98,18 @@ class ScanActivity : FragmentActivity(), CameraPreviewFragment.CameraListener2, 
     }
 
     override fun onCameraCharacteristicsUpdated(sender: CameraPreviewFragment) {
+        preview.getCharacteristic(CameraCharacteristics.SENSOR_ORIENTATION)?.also {
+            thread.rotation = it
+        }
         val sizes = preview.getCharacteristic(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)?.getOutputSizes(SurfaceTexture::class.java)
         if (sizes != null) {
             runOnUiThread {
                 preview.imageSize = sizes[0]
-                augment.imageSize = sizes[0]
+                if (thread.rotation in 45..134 || thread.rotation in 225..314) {
+                    augment.imageSize = Size(sizes[0].height, sizes[0].width)
+                } else {
+                    augment.imageSize = sizes[0]
+                }
                 thread.maxImageSize = sizes[0]
             }
             Log.i(TAG, "Capture size: ${sizes[0].width}x${sizes[0].height}")
