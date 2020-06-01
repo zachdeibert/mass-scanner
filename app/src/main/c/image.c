@@ -1,21 +1,21 @@
 #include <stdint.h>
 #include "image.h"
 
-unsigned realImageWidth(image_t *image) {
+unsigned real_image_width(image_t *image) {
     if ((image->rotation >= 45 && image->rotation < 135) || (image->rotation >= 225 && image->rotation < 315)) {
         return image->height;
     }
     return image->width;
 }
 
-unsigned realImageHeight(image_t *image) {
+unsigned real_image_height(image_t *image) {
     if ((image->rotation >= 45 && image->rotation < 135) || (image->rotation >= 225 && image->rotation < 315)) {
         return image->width;
     }
     return image->height;
 }
 
-plane_vector_t createPlaneVector(image_t *image, plane_t plane, unsigned x, unsigned y, signed dx, signed dy, unsigned count) {
+plane_vector_t create_plane_vector(image_t *image, plane_t plane, unsigned x, unsigned y, signed dx, signed dy, unsigned count) {
     plane_vector_t vec;
     if (image->rotation < 45 || image->rotation >= 315) {
     } else if (image->rotation < 135) {

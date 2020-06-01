@@ -4,11 +4,11 @@
 #include "image.h"
 #include "main.h"
 
-unsigned luminanceProbe(image_t *image, plane_vector_t vec);
+unsigned luminance_probe(image_t *image, plane_vector_t vec);
 
-point_t luminanceProbeTop(image_t *image, unsigned x);
-point_t luminanceProbeLeft(image_t *image, unsigned y);
-point_t luminanceProbeBottom(image_t *image, unsigned x);
-point_t luminanceProbeRight(image_t *image, unsigned y);
+point_t luminance_probe_top(image_t *image, unsigned x);
+point_t luminance_probe_left(image_t *image, unsigned y);
+point_t luminance_probe_bottom(image_t *image, unsigned x);
+point_t luminance_probe_right(image_t *image, unsigned y);
 
 #endif

@@ -11,11 +11,11 @@ error_t process_init(state_t *state) {
 
 error_t process_main(state_t *state, image_t *image, bitmap_t *bitmap, augment_t *augment) {
     augment->valid = 1;
-    unsigned width = realImageWidth(image);
-    unsigned height = realImageHeight(image);
-    augment->points[0] = luminanceProbeTop(image, width / 2);
-    augment->points[1] = luminanceProbeLeft(image, height / 2);
-    augment->points[2] = luminanceProbeBottom(image, width / 2);
-    augment->points[3] = luminanceProbeRight(image, height / 2);
+    unsigned width = real_image_width(image);
+    unsigned height = real_image_height(image);
+    augment->points[0] = luminance_probe_top(image, width / 2);
+    augment->points[1] = luminance_probe_left(image, height / 2);
+    augment->points[2] = luminance_probe_bottom(image, width / 2);
+    augment->points[3] = luminance_probe_right(image, height / 2);
     return ERR_SUCCESS;
 }

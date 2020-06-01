@@ -11,7 +11,7 @@ void fail() {
     exit(EXIT_FAILURE);
 }
 
-void assertThat(int condition, const char *message, ...) {
+void assert_that(int condition, const char *message, ...) {
     if (!condition) {
         va_list va;
         va_start(va, message);

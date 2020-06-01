@@ -5,7 +5,7 @@
 #include "bitmap.h"
 #include "testing.h"
 
-TEST("Bipartite Luminance Probe", bipartiteLuminanceProbe) {
+TEST("Bipartite Luminance Probe", bipartite_luminance_probe) {
     static const signed top[] = {
         -1, -1, -1, -1,  -1, -1, -1, -1,
         -1, -1, -1, -1,  -1,  9,  9,  8,
@@ -39,34 +39,34 @@ TEST("Bipartite Luminance Probe", bipartiteLuminanceProbe) {
         perror("read_bitmap");
         fail();
     }
-    unsigned width = realImageWidth(&image);
-    unsigned height = realImageHeight(&image);
-    assertThat(width == 48 && height == 32, "Image size incorrect.  Expected 48x32, but got %dx%d", width, height);
+    unsigned width = real_image_width(&image);
+    unsigned height = real_image_height(&image);
+    assert_that(width == 48 && height == 32, "Image size incorrect.  Expected 48x32, but got %dx%d", width, height);
     for (unsigned i = 0; i < 32; ++i) {
         if (left[i] > 0) {
-            point_t pt = luminanceProbeLeft(&image, i);
-            assertThat(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_left(&image, i);
+            assert_that(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
         }
         if (right[i] > 0) {
-            point_t pt = luminanceProbeRight(&image, i);
-            assertThat(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_right(&image, i);
+            assert_that(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
         }
     }
     for (unsigned i = 0; i < 48; ++i) {
         if (top[i] > 0) {
-            point_t pt = luminanceProbeTop(&image, i);
-            assertThat(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
+            point_t pt = luminance_probe_top(&image, i);
+            assert_that(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
         }
         if (bottom[i] > 0) {
-            point_t pt = luminanceProbeBottom(&image, i);
-            assertThat(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
+            point_t pt = luminance_probe_bottom(&image, i);
+            assert_that(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
         }
     }
     free_bitmap(&image);
     pass();
 }
 
-TEST("Bipartite Luminance Probe (Rotated Clockwise)", bipartiteLuminanceProbeCW) {
+TEST("Bipartite Luminance Probe (Rotated Clockwise)", bipartite_luminance_probe_CW) {
     static const signed right[] = {
         -1, -1, -1, -1,  -1, -1, -1, -1,
         -1, -1, -1, -1,  -1, 23, 23, 24,
@@ -101,34 +101,34 @@ TEST("Bipartite Luminance Probe (Rotated Clockwise)", bipartiteLuminanceProbeCW)
         fail();
     }
     image.rotation = 90;
-    unsigned width = realImageWidth(&image);
-    unsigned height = realImageHeight(&image);
-    assertThat(width == 32 && height == 48, "Image size incorrect.  Expected 32x48, but got %dx%d", width, height);
+    unsigned width = real_image_width(&image);
+    unsigned height = real_image_height(&image);
+    assert_that(width == 32 && height == 48, "Image size incorrect.  Expected 32x48, but got %dx%d", width, height);
     for (unsigned i = 0; i < 48; ++i) {
         if (left[i] > 0) {
-            point_t pt = luminanceProbeLeft(&image, i);
-            assertThat(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_left(&image, i);
+            assert_that(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
         }
         if (right[i] > 0) {
-            point_t pt = luminanceProbeRight(&image, i);
-            assertThat(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_right(&image, i);
+            assert_that(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
         }
     }
     for (unsigned i = 0; i < 32; ++i) {
         if (top[i] > 0) {
-            point_t pt = luminanceProbeTop(&image, i);
-            assertThat(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
+            point_t pt = luminance_probe_top(&image, i);
+            assert_that(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
         }
         if (bottom[i] > 0) {
-            point_t pt = luminanceProbeBottom(&image, i);
-            assertThat(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
+            point_t pt = luminance_probe_bottom(&image, i);
+            assert_that(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
         }
     }
     free_bitmap(&image);
     pass();
 }
 
-TEST("Bipartite Luminance Probe (Rotated Counter-Clockwise)", bipartiteLuminanceProbeCCW) {
+TEST("Bipartite Luminance Probe (Rotated Counter-Clockwise)", bipartite_luminance_probe_CCW) {
     static const signed left[] = {
         -1, -1, -1, -1,  -1, -1, -1, -1,
         -1, -1, -1, -1,  13,  9,  5,  3,
@@ -163,34 +163,34 @@ TEST("Bipartite Luminance Probe (Rotated Counter-Clockwise)", bipartiteLuminance
         fail();
     }
     image.rotation = 270;
-    unsigned width = realImageWidth(&image);
-    unsigned height = realImageHeight(&image);
-    assertThat(width == 32 && height == 48, "Image size incorrect.  Expected 32x48, but got %dx%d", width, height);
+    unsigned width = real_image_width(&image);
+    unsigned height = real_image_height(&image);
+    assert_that(width == 32 && height == 48, "Image size incorrect.  Expected 32x48, but got %dx%d", width, height);
     for (unsigned i = 0; i < 48; ++i) {
         if (left[i] > 0) {
-            point_t pt = luminanceProbeLeft(&image, i);
-            assertThat(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_left(&image, i);
+            assert_that(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
         }
         if (right[i] > 0) {
-            point_t pt = luminanceProbeRight(&image, i);
-            assertThat(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_right(&image, i);
+            assert_that(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
         }
     }
     for (unsigned i = 0; i < 32; ++i) {
         if (top[i] > 0) {
-            point_t pt = luminanceProbeTop(&image, i);
-            assertThat(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
+            point_t pt = luminance_probe_top(&image, i);
+            assert_that(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
         }
         if (bottom[i] > 0) {
-            point_t pt = luminanceProbeBottom(&image, i);
-            assertThat(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
+            point_t pt = luminance_probe_bottom(&image, i);
+            assert_that(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
         }
     }
     free_bitmap(&image);
     pass();
 }
 
-TEST("Bipartite Luminance Probe (Flipped)", bipartiteLuminanceProbeFlipped) {
+TEST("Bipartite Luminance Probe (Flipped)", bipartite_luminance_probe_flipped) {
     static const signed bottom[] = {
         -1, -1, -1, -1,  -1, -1, -1, -1,
         -1, -1, -1, -1,  19, 23, 27, 29,
@@ -225,27 +225,27 @@ TEST("Bipartite Luminance Probe (Flipped)", bipartiteLuminanceProbeFlipped) {
         fail();
     }
     image.rotation = 180;
-    unsigned width = realImageWidth(&image);
-    unsigned height = realImageHeight(&image);
-    assertThat(width == 48 && height == 32, "Image size incorrect.  Expected 48x32, but got %dx%d", width, height);
+    unsigned width = real_image_width(&image);
+    unsigned height = real_image_height(&image);
+    assert_that(width == 48 && height == 32, "Image size incorrect.  Expected 48x32, but got %dx%d", width, height);
     for (unsigned i = 0; i < 32; ++i) {
         if (left[i] > 0) {
-            point_t pt = luminanceProbeLeft(&image, i);
-            assertThat(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_left(&image, i);
+            assert_that(pt.x == left[i] && pt.y == i, "Probe left (y = %d) expected (%d, %d), but got (%d, %d)", i, left[i], i, pt.x, pt.y);
         }
         if (right[i] > 0) {
-            point_t pt = luminanceProbeRight(&image, i);
-            assertThat(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
+            point_t pt = luminance_probe_right(&image, i);
+            assert_that(pt.x == right[i] && pt.y == i, "Probe right (y = %d) expected (%d, %d), but got (%d, %d)", i, right[i], i, pt.x, pt.y);
         }
     }
     for (unsigned i = 0; i < 48; ++i) {
         if (top[i] > 0) {
-            point_t pt = luminanceProbeTop(&image, i);
-            assertThat(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
+            point_t pt = luminance_probe_top(&image, i);
+            assert_that(pt.x == i && pt.y == top[i], "Probe top (x = %d) expected (%d, %d), but got (%d, %d)", i, i, top[i], pt.x, pt.y);
         }
         if (bottom[i] > 0) {
-            point_t pt = luminanceProbeBottom(&image, i);
-            assertThat(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
+            point_t pt = luminance_probe_bottom(&image, i);
+            assert_that(pt.x == i && pt.y == bottom[i], "Probe bottom (x = %d) expected (%d, %d), but got (%d, %d)", i, i, bottom[i], pt.x, pt.y);
         }
     }
     free_bitmap(&image);

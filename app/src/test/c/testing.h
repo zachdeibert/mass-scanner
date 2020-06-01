@@ -6,6 +6,6 @@
 void pass();
 void fail();
 
-void assertThat(int condition, const char *message, ...);
+void assert_that(int condition, const char *message, ...);
 
 #endif

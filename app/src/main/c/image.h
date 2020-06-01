@@ -26,16 +26,16 @@ typedef struct {
     signed stride;
 } plane_vector_t;
 
-unsigned realImageWidth(image_t *image);
+unsigned real_image_width(image_t *image);
+unsigned real_image_height(image_t *image);
 
-unsigned realImageHeight(image_t *image);
-plane_vector_t createPlaneVector(image_t *image, plane_t plane, unsigned x, unsigned y, signed dx, signed dy, unsigned count);
+plane_vector_t create_plane_vector(image_t *image, plane_t plane, unsigned x, unsigned y, signed dx, signed dy, unsigned count);
 
-static inline void resetPlaneVector(plane_vector_t *vec) {
+static inline void reset_plane_vector(plane_vector_t *vec) {
     vec->buf = vec->start;
 }
 
-static inline int planeVectorNext(plane_vector_t *vec) {
+static inline int plane_vector_next(plane_vector_t *vec) {
     vec->buf += vec->stride;
     if (vec->start < vec->end) {
         return vec->buf <= vec->end;
@@ -44,7 +44,7 @@ static inline int planeVectorNext(plane_vector_t *vec) {
     }
 }
 
-static inline uint8_t planeVectorPixel(plane_vector_t vec) {
+static inline uint8_t plane_vector_pixel(plane_vector_t vec) {
     return *vec.buf;
 }
 

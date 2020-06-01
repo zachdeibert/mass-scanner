@@ -45,4 +45,4 @@ target_link_libraries(mass-scanner-natives-test mass-scanner-natives)
 target_include_directories(mass-scanner-natives-test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 enable_testing()
-add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} -C Debug DEPENDS mass-scanner-natives-test)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} -C Debug DEPENDS mass-scanner-natives-test DEPENDS copyResources)
