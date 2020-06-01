@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "errors.h"
 #include "image.h"
-#include "luminanceProbe.h"
+#include "luminance_probe.h"
 #include "main.h"
 #include "state.h"
 

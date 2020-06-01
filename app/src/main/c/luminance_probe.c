@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include "image.h"
-#include "luminanceProbe.h"
+#include "luminance_probe.h"
 
 unsigned luminance_probe(image_t *image, plane_vector_t vec) {
     uint64_t lum_before = 0;

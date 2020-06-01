@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <image.h>
-#include <luminanceProbe.h>
+#include <luminance_probe.h>
 #include <main.h>
 #include "bitmap.h"
 #include "testing.h"
