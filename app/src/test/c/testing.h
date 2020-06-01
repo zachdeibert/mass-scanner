@@ -7,5 +7,6 @@ void pass();
 void fail();
 
 void assert_that(int condition, const char *message, ...);
+int float_equal(float a, float b, float delta);
 
 #endif

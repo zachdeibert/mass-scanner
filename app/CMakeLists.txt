@@ -8,5 +8,6 @@ add_library(mass-scanner-natives SHARED
     src/main/c/image.c
     src/main/c/luminance_probe.c
     src/main/c/main.c
+    src/main/c/perpendicular_angle_bisector.c
 )
 target_include_directories(mass-scanner-natives PUBLIC src/main/c)

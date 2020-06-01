@@ -22,3 +22,11 @@ void assert_that(int condition, const char *message, ...) {
         fail();
     }
 }
+
+int float_equal(float a, float b, float delta) {
+    float diff = a - b;
+    if (diff < 0) {
+        diff *= -1;
+    }
+    return diff < delta;
+}
