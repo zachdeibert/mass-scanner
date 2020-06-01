@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "args": [
-                "0"
+                "1"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

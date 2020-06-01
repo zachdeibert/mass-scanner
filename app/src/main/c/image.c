@@ -20,23 +20,23 @@ plane_vector_t createPlaneVector(image_t *image, plane_t plane, unsigned x, unsi
     if (image->rotation < 45 || image->rotation >= 315) {
     } else if (image->rotation < 135) {
         unsigned s = x;
-        x = image->height - y;
-        y = s;
+        x = y;
+        y = image->height - 1 - s;
         signed t = dx;
-        dx = -dy;
-        dy = t;
+        dx = dy;
+        dy = -t;
     } else if (image->rotation < 225) {
-        x = image->width - x;
-        y = image->height - y;
+        x = image->width - 1 - x;
+        y = image->height - 1 - y;
         dx = -dx;
         dy = -dy;
     } else {
         unsigned s = x;
-        x = y;
-        y = image->width - x;
+        x = image->width - 1 - y;
+        y = s;
         signed t = dx;
-        dx = dy;
-        dy = -t;
+        dx = -dy;
+        dy = t;
     }
     vec.stride = dx * plane.pixel_stride + dy * plane.row_stride;
     vec.buf = vec.start = ((uint8_t *) plane.buf) + x * plane.pixel_stride + ((signed) y) * plane.row_stride - vec.stride;
