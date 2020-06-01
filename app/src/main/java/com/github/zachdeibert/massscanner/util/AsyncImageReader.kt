@@ -29,7 +29,7 @@ class AsyncImageReader(width: Int, height: Int, format: Int, maxImages: Int) : A
                     return@apply
                 }
             }
-            lockedAcquireNextImage()!!.close()
+            lockedAcquireNextImage()?.close()
         }
         childListener?.onImageAvailable(this)
     }
