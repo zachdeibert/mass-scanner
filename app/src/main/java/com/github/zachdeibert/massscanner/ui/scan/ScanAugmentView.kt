@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Point
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Size
 import android.view.View
 import com.github.zachdeibert.massscanner.R
@@ -29,7 +28,6 @@ class ScanAugmentView : View, ScanThread.AnalysisListener {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         points?.apply {
-            Log.d("ScanAugmentView", "Points: (${this[0].x}, ${this[0].y}), (${this[1].x}, ${this[1].y}), (${this[2].x}, ${this[2].y}), (${this[3].x}, ${this[3].y})")
             val sw = width.toFloat() / imageSize.width.toFloat()
             val sh = height.toFloat() / imageSize.height.toFloat()
             val x0 = this[0].x.toFloat() * sw

@@ -3,6 +3,7 @@
 #include "image.h"
 #include "luminance_probe.h"
 #include "main.h"
+#include "multi_probe_least_squares.h"
 #include "perpendicular_angle_bisector.h"
 #include "state.h"
 
@@ -20,6 +21,6 @@ error_t process_main(state_t *state, image_t *image, bitmap_t *bitmap, augment_t
         luminance_probe_bottom(image, width / 2),
         luminance_probe_right(image, height / 2)
     };
-    perpendicular_angle_bisector_box(centers, augment->points);
+    least_squares_box(centers, augment->points, image, 5);
     return ERR_SUCCESS;
 }

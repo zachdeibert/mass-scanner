@@ -89,7 +89,6 @@ class ScanNative : AutoCloseable {
     private var params: IntBuffer
 
     fun processFrame(image: Image, rotation: Int, bitmap: ByteBuffer): ScanResult {
-        Log.d("ScanNative", "width = ${image.width}, height = ${image.height}, rotation = $rotation")
         synchronized(params) {
             val planes = image.planes
             params.put(PARAMETER_IMAGE_WIDTH, image.width)

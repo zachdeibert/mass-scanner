@@ -43,7 +43,7 @@ TEST("Solve Intersection", solve_intersection) {
         .x = 256,
         .y = 140
     };
-    point_t intersection = solve_intersection(pt0, 2.67f, pt1, 0.118f);
+    point_t intersection = solve_intersection((float) pt0.x, (float) pt0.y, 2.67f, (float) pt1.x, (float) pt1.y, 0.118f);
     point_t exp = {
         .x = 1803,
         .y = 323
