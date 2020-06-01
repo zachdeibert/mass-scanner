@@ -7,12 +7,21 @@ static void usage(const char *err, const char **argv);
 static void do_chdir(const char *path);
 
 int main(int argc, const char **argv) {
-    if (argc != 2) {
-        usage("Invalid number of arguments", argv);
+    int idx = -1;
+    if (argc == 1) {
+        FILE *file = fopen(".vscode/debug_profile.txt", "r");
+        if (file) {
+            fscanf(file, "%d", &idx);
+            fclose(file);
+        }
     }
-    int idx;
-    if (sscanf(argv[1], "%d", &idx) != 1) {
-        usage("Test number must be an int", argv);
+    if (idx < 0) {
+        if (argc != 2) {
+            usage("Invalid number of arguments", argv);
+        }
+        if (sscanf(argv[1], "%d", &idx) != 1) {
+            usage("Test number must be an int", argv);
+        }
     }
     if (idx < 0 || idx >= tests_count) {
         usage("Test number out of range", argv);

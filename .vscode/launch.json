@@ -8,9 +8,7 @@
             "name": "Test",
             "type": "cppvsdbg",
             "request": "launch",
-            "args": [
-                "6"
-            ],
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
