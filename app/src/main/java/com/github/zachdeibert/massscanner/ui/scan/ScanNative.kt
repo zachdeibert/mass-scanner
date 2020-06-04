@@ -18,7 +18,8 @@ class ScanNative : AutoCloseable {
         ERR_INVALID_PTR(-1, IllegalArgumentException("Pointer is invalid")),
         ERR_NOT_IMPLEMENTED(-2, NotImplementedError("Method is not implemented")),
         ERR_ARGUMENT_NULL(-3, IllegalArgumentException("Argument cannot be null")),
-        ERR_INVALID_BUFFER(-4, IllegalArgumentException("Buffer is not direct"));
+        ERR_INVALID_BUFFER(-4, IllegalArgumentException("Buffer is not direct")),
+        ERR_JNI_FAILURE(-5, RuntimeException("JNI error"));
 
         companion object {
             fun lookup(code: Int): Error {

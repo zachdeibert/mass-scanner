@@ -10,5 +10,6 @@ typedef int32_t error_t;
 #define ERR_NOT_IMPLEMENTED ((error_t) -2)
 #define ERR_ARGUMENT_NULL ((error_t) -3)
 #define ERR_INVALID_BUFFER ((error_t) -4)
+#define ERR_JNI_FAILURE ((error_t) -5)
 
 #endif

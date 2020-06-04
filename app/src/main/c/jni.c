@@ -1,9 +1,13 @@
+#include "jni_iface.h"
+#define TAG "jni.c"
+
 #ifdef __ANDROID__
 
 #include <stdlib.h>
 #include <jni.h>
 #include "errors.h"
 #include "image.h"
+#include "log.h"
 #include "main.h"
 #include "state.h"
 
@@ -38,25 +42,96 @@
 
 #define SUPPRESS_UNUSED_PARAMETER(x) do { (void) x; } while (0)
 
+typedef struct {
+    jni_state_t *state;
+    JNIEnv *env;
+} jni_tls_state_t;
+
+static __thread jni_tls_state_t *tls_state = NULL;
+
+void jni_log_handler(int level, const char *_tag, const char *_message) {
+    if (tls_state) {
+        if (level >= JNI_LOG_LEVEL_COUNT) {
+            log_wtf(TAG, "Unknown logging level %d", level);
+            return;
+        }
+        jstring tag = (*tls_state->env)->NewStringUTF(tls_state->env, _tag);
+        jstring message = (*tls_state->env)->NewStringUTF(tls_state->env, _message);
+        (*tls_state->env)->CallStaticIntMethod(tls_state->env, tls_state->state->log, tls_state->state->log_methods[level], tag, message);
+        (*tls_state->env)->DeleteLocalRef(tls_state->env, message);
+        (*tls_state->env)->DeleteLocalRef(tls_state->env, tag);
+    }
+}
+
+#define JNI_TLS_INIT() \
+    jni_tls_state_t __tls_state = { \
+        .state = state->jni_state, \
+        .env = env \
+    }; \
+    do { \
+        if (tls_state) { \
+            log_wtf(TAG, "Recursive JNI call detected"); \
+            tls_state = &__tls_state; \
+            log_wtf(TAG, "Recursive JNI call detected"); \
+        } else { \
+            tls_state = &__tls_state; \
+        } \
+    } while (0)
+#define JNI_TLS_END() \
+    do { \
+        tls_state = NULL; \
+    } while (0)
+
 JNIEXPORT jlong JNICALL jni_setup(JNIEnv *env, jobject this, jobject parameters) {
     SUPPRESS_UNUSED_PARAMETER(env);
     SUPPRESS_UNUSED_PARAMETER(this);
-    state_t *state = (state_t *) malloc(sizeof(state_t));
+    state_t *state = (state_t *) malloc(sizeof(state_t) + sizeof(jni_state_t));
     if (!state) {
         return 0;
     }
+    state->jni_state = (jni_state_t *) (state + 1);
+    jclass c = (*env)->FindClass(env, "android/util/Log");
+    if (!c) {
+        state->setup_error = ERR_JNI_FAILURE;
+        return (jlong) state;
+    }
+    state->jni_state->log = (jclass) (*env)->NewGlobalRef(env, c);
+    (*env)->DeleteLocalRef(env, c);
+    if (!state->jni_state->log) {
+        state->setup_error = ERR_JNI_FAILURE;
+        return (jlong) state;
+    }
+#define LOG_METHOD(n, l) \
+    do { \
+        state->jni_state->log_methods[n] = (*env)->GetStaticMethodID(env, state->jni_state->log, l, "(Ljava/lang/String;Ljava/lang/String;)I"); \
+        if (!state->jni_state->log_methods[n]) { \
+            state->setup_error = ERR_JNI_FAILURE; \
+            return (jlong) state; \
+        } \
+    } while (0)
+    LOG_METHOD(LOG_LEVEL_VERBOSE, "v");
+    LOG_METHOD(LOG_LEVEL_DEBUG, "d");
+    LOG_METHOD(LOG_LEVEL_INFO, "i");
+    LOG_METHOD(LOG_LEVEL_WARNING, "w");
+    LOG_METHOD(LOG_LEVEL_ERROR, "e");
+    LOG_METHOD(LOG_LEVEL_WTF, "wtf");
+#undef LOG_METHOD
     state->magic = STATE_T_MAGIC;
     if (!parameters) {
         state->setup_error = ERR_ARGUMENT_NULL;
+        JNI_TLS_END();
         return (jlong) state;
     }
     if ((*env)->GetDirectBufferCapacity(env, parameters) != PARAMETERS_SIZE) {
         state->setup_error = ERR_INVALID_BUFFER;
+        JNI_TLS_END();
         return (jlong) state;
     }
     state->parameters = (*env)->GetDirectBufferAddress(env, parameters);
     state->parameters[PARAMETER_OUTPUT_FLAGS] = OUTPUT_FLAG_SETUP_COMPLETE;
+    JNI_TLS_INIT();
     state->setup_error = process_init(state);
+    JNI_TLS_END();
     return (jlong) state;
 }
 
@@ -126,7 +201,9 @@ JNIEXPORT jint JNICALL jni_process_frame(JNIEnv *env, jobject this, jlong ptr, j
     if (image.y.buf_len < 0 || image.u.buf_len < 0 || image.v.buf_len < 0 || bitmap.buf_len < 0) {
         return ERR_INVALID_BUFFER;
     }
+    JNI_TLS_INIT();
     error_t err = process_main(state, &image, &bitmap, &augment);
+    JNI_TLS_END();
     state->parameters[PARAMETER_OUTPUT_FLAGS] = 0 |
                     (bitmap.captured ? OUTPUT_FLAG_IMAGE_READY : 0) |
                     (augment.valid ? OUTPUT_FLAG_AUGMENT_READY : 0);
@@ -145,9 +222,13 @@ JNIEXPORT jint JNICALL jni_process_frame(JNIEnv *env, jobject this, jlong ptr, j
 
 JNIEXPORT jint JNICALL jni_cleanup(JNIEnv *env, jobject this, jlong ptr) {
     METHOD_HEAD;
+    JNI_TLS_INIT();
+    error_t err = process_free(state);
+    JNI_TLS_END();
+    (*env)->DeleteGlobalRef(env, state->jni_state->log);
     state->magic = 0;
     free(state);
-    return ERR_SUCCESS;
+    return err;
 }
 
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -171,7 +252,29 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (rc != JNI_OK) {
         return rc;
     }
+    (*env)->DeleteLocalRef(env, c);
     return REQ_VERSION;
+}
+
+#else
+#include <stdio.h>
+
+static const char *const levels[] = {
+    "[VERBO] ",
+    "[DEBUG] ",
+    "[INFO ] ",
+    "[WARN ] ",
+    "[ERROR] ",
+    "[ WTF ] "
+};
+
+void jni_log_handler(int level, const char *tag, const char *message) {
+    if (level >= JNI_LOG_LEVEL_COUNT) {
+        log_wtf(TAG, "Unknown logging level %d", level);
+        return;
+    }
+    fputs(levels[level], stdout);
+    puts(message);
 }
 
 #endif
