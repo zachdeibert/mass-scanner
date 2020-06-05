@@ -7,7 +7,8 @@
 
 #define TAG "history.c"
 #define LOG_PERIOD 100
-#define MAX_DEVIATION 0.01
+#define SCAN_DEVIATION 0.001
+#define PREVIEW_DEVIATION_FACTOR 10
 #define ENABLE_FRACTION 3 / 4
 #define DISABLE_FRACTION 1 / 4
 
@@ -21,7 +22,8 @@ history_t *history_alloc(unsigned max_entries) {
 }
 
 int history_push(image_t *image, history_t *state, point_t *corners_in, point_t *corners_out) {
-    static unsigned counter;
+    static unsigned counter = 0;
+    int ret = 0;
     float mean[4][2];
     for (unsigned i = 0; i < 4; ++i) {
         state->sum.corners[i].x -= state->entries[state->entries_pos].corners[i].x;
@@ -51,14 +53,20 @@ int history_push(image_t *image, history_t *state, point_t *corners_in, point_t 
     }
     stddev /= 8 * (image->width + image->height) / 2;
     if (state->until_enable == 0) {
-        if (stddev > MAX_DEVIATION) {
+        ret |= HISTORY_PUSH_WRITE_AUGMENT;
+        if (stddev > SCAN_DEVIATION * PREVIEW_DEVIATION_FACTOR) {
             if (--state->until_disable == 0) {
                 state->until_enable = state->entries_length * ENABLE_FRACTION;
+                state->state &= ~HISTORY_STATE_SCANNED;
+                ret ^= HISTORY_PUSH_WRITE_AUGMENT;
             }
         } else if (state->until_disable < state->entries_length * DISABLE_FRACTION) {
             ++state->until_disable;
+        } else if (stddev < SCAN_DEVIATION && !(state->state & HISTORY_STATE_SCANNED)) {
+            state->state |= HISTORY_STATE_SCANNED;
+            ret |= HISTORY_PUSH_WRITE_IMAGE;
         }
-    } else if (stddev < MAX_DEVIATION) {
+    } else if (stddev < SCAN_DEVIATION * PREVIEW_DEVIATION_FACTOR) {
         if (--state->until_enable == 0) {
             state->until_disable = state->entries_length * DISABLE_FRACTION;
         }
@@ -72,5 +80,5 @@ int history_push(image_t *image, history_t *state, point_t *corners_in, point_t 
         counter = 0;
         log_d(TAG, "stddev = %f", stddev);
     }
-    return state->until_enable == 0;
+    return ret;
 }

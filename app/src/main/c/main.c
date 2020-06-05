@@ -30,6 +30,12 @@ error_t process_main(state_t *state, image_t *image, bitmap_t *bitmap, augment_t
     };
     point_t corners[4];
     least_squares_box(centers, corners, image, 5);
-    augment->valid = history_push(image, state->history, corners, augment->points);
+    int act = history_push(image, state->history, corners, augment->points);
+    if (act & HISTORY_PUSH_WRITE_AUGMENT) {
+        augment->valid = 1;
+    }
+    if (act & HISTORY_PUSH_WRITE_IMAGE) {
+        bitmap->captured = 1;
+    }
     return ERR_SUCCESS;
 }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector android:width="100dp"
+            android:height="100dp"
+            android:viewportWidth="100"
+            android:viewportHeight="100"
+            android:name="root"
+            android:alpha="0">
+            <path android:pathData="M0,0 H100 V100 H0 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient android:startX="0" android:startY="50" android:endX="100" android:endY="50" android:type="linear">
+                        <item android:color="@color/scan_glow_solid" android:offset="0" />
+                        <item android:color="@color/scan_glow_clear" android:offset="0.1" />
+                        <item android:color="@color/scan_glow_clear" android:offset="0.9" />
+                        <item android:color="@color/scan_glow_solid" android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+            <path android:pathData="M0,0 H100 V100 H0 Z">
+                <aapt:attr name="android:fillColor">
+                    <gradient android:startX="50" android:startY="0" android:endX="50" android:endY="100" android:type="linear">
+                        <item android:color="@color/scan_glow_solid" android:offset="0" />
+                        <item android:color="@color/scan_glow_clear" android:offset="0.1" />
+                        <item android:color="@color/scan_glow_clear" android:offset="0.9" />
+                        <item android:color="@color/scan_glow_solid" android:offset="1" />
+                    </gradient>
+                </aapt:attr>
+            </path>
+        </vector>
+    </aapt:attr>
+    <target android:name="root">
+        <aapt:attr name="android:animation">
+            <set android:ordering="sequentially">
+                <objectAnimator android:duration="75"
+                    android:propertyName="alpha"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+                <objectAnimator android:duration="225"
+                    android:propertyName="alpha"
+                    android:valueFrom="1"
+                    android:valueTo="0"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

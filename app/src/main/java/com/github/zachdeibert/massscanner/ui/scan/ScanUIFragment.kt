@@ -106,6 +106,8 @@ class ScanUIFragment : Fragment(), ScanThread.AnalysisListener {
     override fun onBitmapSaved(bitmap: Bitmap) {
         ++model.scannedPages
         // TODO handle saving to file
-        onStatusUpdate()
+        requireActivity().runOnUiThread {
+            onStatusUpdate()
+        }
     }
 }

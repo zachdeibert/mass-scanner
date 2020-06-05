@@ -1,11 +1,10 @@
 package com.github.zachdeibert.massscanner.ui.scan
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Point
+import android.graphics.*
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Size
 import android.view.View
 import com.github.zachdeibert.massscanner.R
@@ -13,6 +12,7 @@ import kotlin.math.max
 
 class ScanAugmentView : View, ScanThread.AnalysisListener {
     private val paint = Paint()
+    private lateinit var animation: AnimatedVectorDrawable
     private var points: Array<Point>? = null
 
     private var _imageSize: Size = Size(1080, 1920)
@@ -67,7 +67,8 @@ class ScanAugmentView : View, ScanThread.AnalysisListener {
     }
 
     override fun onBitmapSaved(bitmap: Bitmap) {
-        TODO("Not yet implemented")
+        Log.d("ScanAugmentView", "Image scanned.")
+        animation.start()
     }
 
     private fun init(context: Context) {
@@ -76,6 +77,8 @@ class ScanAugmentView : View, ScanThread.AnalysisListener {
         paint.strokeJoin = Paint.Join.ROUND
         paint.strokeWidth = 20f
         paint.style = Paint.Style.STROKE
+        animation = context.getDrawable(R.drawable.scan_glow) as AnimatedVectorDrawable;
+        background = animation
     }
 
     constructor(context: Context) : super(context) {

@@ -3,4 +3,6 @@
     <color name="image_text_color">#FFFFFF</color>
     <color name="image_text_shadow">#000000</color>
     <color name="scan_augment_box">#7F3FFF</color>
+    <color name="scan_glow_solid">#3FFF7F</color>
+    <color name="scan_glow_clear">#00000000</color>
 </resources>
