@@ -171,6 +171,7 @@ class ScanThread : Thread("Scanning Worker"), AsyncImageReader.OnImageAvailableL
                         if (res.hasOutputImage) {
                             fireBitmapSaved(lazy {
                                 Bitmap.createBitmap(res.imageWidth, res.imageHeight, Bitmap.Config.ARGB_8888).apply {
+                                    bitmap.rewind()
                                     copyPixelsFromBuffer(bitmap)
                                 }
                             })
