@@ -1,10 +1,9 @@
 #ifndef MASS_SCANNER_PERPENDICULAR_ANGLE_BISECTOR_H
 #define MASS_SCANNER_PERPENDICULAR_ANGLE_BISECTOR_H
 
-#include "main.h"
+#include "geometry.h"
 
-float perpendicular_angle_bisector(point_t pivot, point_t a, point_t b, point_t inside);
-point_t solve_intersection(float x0, float y0, float angle0, float x1, float y1, float angle1);
-void perpendicular_angle_bisector_box(point_t *centers, point_t *corners);
+ray2_t perpendicular_angle_bisector(vec2_t pivot, vec2_t a, vec2_t b, vec2_t inside);
+void perpendicular_angle_bisector_box(vec2_t *centers, vec2_t *corners);
 
 #endif

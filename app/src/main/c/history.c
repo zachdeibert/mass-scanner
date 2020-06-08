@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "geometry.h"
 #include "history.h"
 #include "image.h"
 #include "log.h"
@@ -21,7 +22,7 @@ history_t *history_alloc(unsigned max_entries) {
     return state;
 }
 
-int history_push(image_t *image, history_t *state, point_t *corners_in, point_t *corners_out) {
+int history_push(image_t *image, history_t *state, vec2_t *corners_in, point_t *corners_out) {
     static unsigned counter = 0;
     int ret = 0;
     float mean[4][2];
@@ -32,17 +33,17 @@ int history_push(image_t *image, history_t *state, point_t *corners_in, point_t 
         state->entries[state->entries_pos].corners[i].y = corners_in[i].y;
         state->sum.corners[i].x += corners_in[i].x;
         state->sum.corners[i].y += corners_in[i].y;
-        mean[i][0] = ((float) state->sum.corners[i].x) / (float) state->entries_length;
-        mean[i][1] = ((float) state->sum.corners[i].y) / (float) state->entries_length;
-        corners_out[i].x = mean[i][0];
-        corners_out[i].y = mean[i][1];
+        mean[i][0] = state->sum.corners[i].x / state->entries_length;
+        mean[i][1] = state->sum.corners[i].y / state->entries_length;
+        corners_out[i].x = (unsigned) mean[i][0];
+        corners_out[i].y = (unsigned) mean[i][1];
     }
     float deviation[4][2] = { { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } };
     for (unsigned i = 0; i < state->entries_length; ++i) {
         for (unsigned j = 0; j < 4; ++j) {
-            float diff = ((float) state->entries[i].corners[j].x) - mean[j][0];
+            float diff = state->entries[i].corners[j].x - mean[j][0];
             deviation[j][0] += diff * diff;
-            diff = ((float) state->entries[i].corners[j].y) - mean[j][1];
+            diff = state->entries[i].corners[j].y - mean[j][1];
             deviation[j][1] += diff * diff;
         }
     }

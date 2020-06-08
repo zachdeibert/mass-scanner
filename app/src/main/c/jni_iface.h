@@ -10,6 +10,8 @@ typedef struct {
 #ifdef __ANDROID__
     jclass log;
     jmethodID log_methods[JNI_LOG_LEVEL_COUNT];
+#else
+    char __resv;
 #endif
 } jni_state_t;
 

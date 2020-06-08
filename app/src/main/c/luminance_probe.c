@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "geometry.h"
 #include "image.h"
 #include "luminance_probe.h"
 
@@ -29,38 +30,38 @@ unsigned luminance_probe(image_t *image, plane_vector_t vec) {
     return res;
 }
 
-point_t luminance_probe_top(image_t *image, unsigned x) {
+vec2_t luminance_probe_top(image_t *image, unsigned x) {
     unsigned height = real_image_height(image);
-    point_t pt = {
-            .x = x,
-            .y = luminance_probe(image, create_plane_vector(image, image->y, x, 0, 0, 1, height / 2))
+    vec2_t pt = {
+            .x = (float) x,
+            .y = (float) luminance_probe(image, create_plane_vector(image, image->y, x, 0, 0, 1, height / 2))
     };
     return pt;
 }
 
-point_t luminance_probe_left(image_t *image, unsigned y) {
+vec2_t luminance_probe_left(image_t *image, unsigned y) {
     unsigned width = real_image_width(image);
-    point_t pt = {
-            .x = luminance_probe(image, create_plane_vector(image, image->y, 0, y, 1, 0, width / 2)),
-            .y = y
+    vec2_t pt = {
+            .x = (float) luminance_probe(image, create_plane_vector(image, image->y, 0, y, 1, 0, width / 2)),
+            .y = (float) y
     };
     return pt;
 }
 
-point_t luminance_probe_bottom(image_t *image, unsigned x) {
+vec2_t luminance_probe_bottom(image_t *image, unsigned x) {
     unsigned height = real_image_height(image);
-    point_t pt = {
-            .x = x,
-            .y = height - luminance_probe(image, create_plane_vector(image, image->y, x, height - 1, 0, -1, height / 2))
+    vec2_t pt = {
+            .x = (float) x,
+            .y = (float) (height - luminance_probe(image, create_plane_vector(image, image->y, x, height - 1, 0, -1, height / 2)))
     };
     return pt;
 }
 
-point_t luminance_probe_right(image_t *image, unsigned y) {
+vec2_t luminance_probe_right(image_t *image, unsigned y) {
     unsigned width = real_image_width(image);
-    point_t pt = {
-            .x = width - luminance_probe(image, create_plane_vector(image, image->y, width - 1, y, -1, 0, width / 2)),
-            .y = y
+    vec2_t pt = {
+            .x = (float) (width - luminance_probe(image, create_plane_vector(image, image->y, width - 1, y, -1, 0, width / 2))),
+            .y = (float) y
     };
     return pt;
 }

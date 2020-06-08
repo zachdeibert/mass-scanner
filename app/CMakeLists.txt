@@ -4,6 +4,7 @@ project(mass-scanner-natives)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(mass-scanner-natives SHARED
+    src/main/c/geometry.c
     src/main/c/history.c
     src/main/c/jni.c
     src/main/c/log.c

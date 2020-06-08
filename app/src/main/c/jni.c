@@ -1,4 +1,6 @@
 #include "jni_iface.h"
+#include "log.h"
+
 #define TAG "jni.c"
 
 #ifdef __ANDROID__
@@ -7,7 +9,6 @@
 #include <jni.h>
 #include "errors.h"
 #include "image.h"
-#include "log.h"
 #include "main.h"
 #include "state.h"
 

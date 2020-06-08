@@ -1,6 +1,7 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
+#include "geometry.h"
 #include "image.h"
 #include "main.h"
 
@@ -10,7 +11,7 @@
 #define HISTORY_PUSH_WRITE_IMAGE (2)
 
 typedef struct {
-    point_t corners[4];
+    vec2_t corners[4];
 } history_entry_t;
 
 typedef struct {
@@ -24,6 +25,6 @@ typedef struct {
 } history_t;
 
 history_t *history_alloc(unsigned max_entries);
-int history_push(image_t *image, history_t *state, point_t *corners_in, point_t *corners_out);
+int history_push(image_t *image, history_t *state, vec2_t *corners_in, point_t *corners_out);
 
 #endif

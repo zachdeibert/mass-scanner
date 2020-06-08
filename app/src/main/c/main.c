@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "errors.h"
+#include "geometry.h"
 #include "history.h"
 #include "image.h"
 #include "luminance_probe.h"
@@ -22,13 +23,13 @@ error_t process_free(state_t *state) {
 error_t process_main(state_t *state, image_t *image, bitmap_t *bitmap, augment_t *augment) {
     unsigned width = real_image_width(image);
     unsigned height = real_image_height(image);
-    point_t centers[4] = {
+    vec2_t centers[4] = {
         luminance_probe_top(image, width / 2),
         luminance_probe_left(image, height / 2),
         luminance_probe_bottom(image, width / 2),
         luminance_probe_right(image, height / 2)
     };
-    point_t corners[4];
+    vec2_t corners[4];
     least_squares_box(centers, corners, image, 5);
     int act = history_push(image, state->history, corners, augment->points);
     if (act & HISTORY_PUSH_WRITE_AUGMENT) {
